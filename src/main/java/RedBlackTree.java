@@ -1,11 +1,13 @@
 import org.w3c.dom.Node;
 
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
+import java.util.function.Consumer;
 
-public class RedBlackTree<T extends Comparable<T>> {
+public class RedBlackTree<T extends Comparable<T>> implements Iterable<T> {
     private static final boolean RED = true;
     private static final boolean BLACK= false;
+
+
 
     private class Node{
         T data;
@@ -289,4 +291,46 @@ private void printTree(Node node, String prefix, boolean isLast) {
         }
     }
 }
+    @Override
+    public Iterator<T> iterator() {
+        return new RBTreeIterator();
+    }
+
+    @Override
+    public void forEach(Consumer<? super T> action) {
+        Iterable.super.forEach(action);
+    }
+
+    private class RBTreeIterator implements Iterator<T> {
+        private Stack<RedBlackTree.Node> stack;
+        private RedBlackTree.Node current;
+
+        public RBTreeIterator() {
+            stack = new Stack<>();
+            current = root;
+            pushLeftPath(current);
+        }
+
+        private void pushLeftPath(RedBlackTree.Node node) {
+            while (node != NIL){
+                stack.push(node);
+                node = node.left;
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            return !stack.isEmpty() || current != NIL;
+        }
+
+        @Override
+        public T next() {
+            if (!hasNext()) throw new NoSuchElementException();
+            RedBlackTree.Node node = stack.pop();
+            T data = (T) node.data;
+            current = node.right;
+            pushLeftPath(current);
+            return  data;
+        }
+    }
 }
